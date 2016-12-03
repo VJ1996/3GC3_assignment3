@@ -1,3 +1,19 @@
+#ifdef __APPLE__
+#  include <OpenGL/gl.h>
+#  include <OpenGL/glu.h>
+#  include <GLUT/glut.h>
+#else
+#  include <GL/gl.h>
+#  include <GL/glu.h>
+#  include <GL/freeglut.h>
+#endif
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <algorithm>
+#include <iostream>
+#include <fstream>
+#include <sstream>
 
 #include "object.h"
 #include <vector>
@@ -19,6 +35,12 @@ Object::Object()
 	this->rZ = 0;
 
 	scale=1;
+
+	float m_amb[3];
+	float m_diff[3];
+	float m_spec[3];
+	float shiny;
+	
 }
 
 Object::Object(float pX,float pY,float pZ, float rX, float rY, float rZ, float sX, float sY, float sZ, int type)
@@ -92,7 +114,76 @@ float Object::getPZ()
 
 void Object::setMaterial(int mat)
 {
-	materialType = mat;
+	switch(mat)
+	{
+	case 0:		
+		m_amb[0] = 0.24725;
+		m_amb[1] = 0.1995;
+		m_amb[2] = 0.0745;
+		m_diff[0] = 0.75164;
+		m_diff[1] = 0.60648;
+		m_diff[2] = 0.22648;
+		m_spec[0] = 0.628281;
+		m_spec[1] = 0.555802;
+		m_spec[2] = 0.366065;
+		shiny = 04;
+		break;
+	case 1:
+		m_amb[0]  = 0.19225;
+		m_amb[1] = 0.19225;
+		m_amb[2] = 0.19225;
+		m_diff[0] = 0.50754;
+		m_diff[1] = 0.50754;
+		m_diff[2] = 0.50754;
+		m_spec[0] = 0.508273;
+		m_spec[1] = 0.508273;
+		m_spec[2] = 0.508273;
+		shiny = 0.4;
+	case 2:
+		m_amb[0] = 0.25;
+		m_amb[1] = 0.25;
+		m_amb[2] = 0.25;
+		m_diff[0] = 0.4;
+		m_diff[1] = 0.4;
+		m_diff[2] = 0.4;
+		m_spec[0] = 0.774597;
+		m_spec[1] = 0.774597;
+		m_spec[2] = 0.774597;
+		shiny = 0.6;
+		break;
+	case 3:
+		m_amb[0] = 0.2125;
+		m_amb[1] = 0.2125;
+		m_amb[2] = 0.2125;
+		m_diff[0] = 0.714;
+		m_diff[1] = 0.714;
+		m_diff[2] = 0.714;
+		m_spec[0] = 0.393548;
+		m_spec[1] = 0.393548;
+		m_spec[2] = 0.393548;
+		shiny = 0.2;
+		break;
+	case 4:
+		m_amb[0] = 0.1745;
+		m_amb[1] = 0.1745;
+		m_amb[2] = 0.1745;
+		m_diff[0] = 0.61424;
+		m_diff[1] = 0.61424;
+		m_diff[2] = 0.61424;
+		m_spec[0] = 0.727811;
+		m_spec[1] = 0.727811;
+		m_spec[2] = 0.727811;
+		shiny = 0.6;
+		break;
+	}
+}
+
+void Object::drawMaterial()
+{
+	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, m_amb);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, m_diff);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, m_spec);
+	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, shiny);
 }
 
 int Object::getMaterial()
@@ -100,18 +191,92 @@ int Object::getMaterial()
 	return materialType;
 }
 
+void Object::drawObject(bool cObject)
+{
+	glPushMatrix();
+			glTranslatef(pX, pY, pZ);
+			glRotatef(rY, 0, 1 , 0);
+			glRotatef(rX, 1, 0, 0);
+			
+			glRotatef(rZ, 0, 0, 1);
+			glColor3f(0.25,0.25,0.25);
+
+			switch(objectType)
+			{
+				case Cube:
+					glutSolidCube(scale);
+					break;
+				case Sphere:
+					glutSolidSphere(scale/2, 100,100);
+					break;
+				case Cone:
+					glPushMatrix();
+					glTranslatef(0, 0, -scale/2);
+					glutSolidCone(scale/2, scale, 32,32);
+					glPopMatrix();
+					break;
+				case Torus:
+					glPushMatrix();
+					glScalef(1,1,3);
+					glutSolidTorus(scale/3-scale/6, scale/3, 32, 32);
+					glPopMatrix();
+					break;
+				case Teapot:
+					glutSolidTeapot(scale);
+					break;
+			}
+			
+			if(cObject)
+			{
+				glColor3f(1,0,0);
+				switch(objectType)
+				{
+					case Cube:
+						glutWireCube(scale);
+						break;
+					case Sphere:
+						glutWireSphere(scale/2, 100, 100);
+						break;
+					case Cone:
+						glPushMatrix();
+						glTranslatef(0, 0, -scale/2);
+						glutWireCone(scale/2, scale, 32, 32);
+						glPopMatrix();
+						break;
+					case Torus:
+						glPushMatrix();
+						glScalef(1, 1, 3);
+						glutWireTorus(scale/3 - scale/6,scale/3, 32, 32);
+						glPopMatrix();
+						break;
+					case Teapot:
+						glutWireTeapot(scale);
+						break;
+				}
+			}	
+		glPopMatrix();
+}
+
 void Object::setObject(int object)
 {
-	if(object == 0)
-		objectType = Cube;
-	else if(object == 1)
-		objectType = Sphere;
-	else if(object == 2)
-		objectType == Cone;
-	else if(object == 3)
-		objectType == Torus;
-	else if(object == 4)
-		objectType == Teapot;
+	switch(object)
+	{
+		case 0:
+			objectType = Cube;
+			break;
+		case 1:
+			objectType = Sphere;
+			break;
+		case 2:
+			objectType = Cone;
+			break;
+		case 3:
+			objectType = Torus;
+			break;
+		case 4:
+			objectType = Teapot;
+			break;
+	}
 	
 }
 

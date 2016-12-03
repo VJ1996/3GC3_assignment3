@@ -24,6 +24,7 @@ public:
 
 	void setMaterial(int mat);
 	int getMaterial();
+	void drawMaterial();
 
 	void setObject(int object);
 	int getObject();
@@ -42,11 +43,17 @@ public:
 
 	float getScale();
 	
+	void drawObject(bool cObject);
 
 private:
 	ObjectType objectType;
 
 	int materialType;
+
+	float m_amb[3];
+	float m_diff[3];
+	float m_spec[3];
+	float shiny;
 
 	float pX;
 	float pY;

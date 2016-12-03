@@ -42,6 +42,8 @@ Object* currentObject;
 
 int materialType;
 
+
+
  enum ObjectType{ 
 	Cube,
 	Sphere,
@@ -56,6 +58,7 @@ int materialType;
  ***/
 
 
+
 void keyboard(unsigned char key, int x, int y)
 {
 
@@ -68,14 +71,19 @@ void keyboard(unsigned char key, int x, int y)
 			break;
 		case '1':
 			materialType = 0;
+			break;
 		case'2':
 			materialType = 1;
+			break;
 		case'3':
 			materialType = 2;
+			break;
 		case'4':
 			materialType = 3;
+			break;
 		case'5':
 			materialType = 4;
+			break;
 		case'6':
 		{
 			currentObject = new Object();
@@ -214,67 +222,9 @@ void drawObject()
 	{
 		Object* objDraw = *draw;
 		Object objD = *objDraw;
-		objD.setMaterial(objD.getMaterial());
-			glPushMatrix();
-			glTranslatef(objD.getPX(), objD.getPY(), objD.getPZ());
-			glRotatef(objD.getRX(), 1, 0, 0);
-			glRotatef(objD.getRY(), 0, 1 , 0);
-			glRotatef(objD.getRZ(), 0, 0, 1);
-			glColor3f(0.25,0.25,0.25);
-
-			switch(objD.getObject())
-			{
-				case 0:
-					glutSolidCube(objD.getScale());
-					break;
-				case 1:
-					glutSolidSphere(objD.getScale()/2, 100,100);
-					break;
-				case 2:
-					glPushMatrix();
-					glTranslatef(0, 0, -objD.getScale()/2);
-					glutSolidCone(objD.getScale()/2, objD.getScale(), 32,32);
-					glPopMatrix();
-					break;
-				case 3:
-					glPushMatrix();
-					glScalef(1,1,3);
-					glutSolidTorus(objD.getScale()/3-objD.getScale()/6, objD.getScale()/3, 32, 32);
-					glPopMatrix();
-					break;
-				case 4:
-					glutSolidTeapot(objD.getScale());
-			}
-			if(objDraw==currentObject)
-			{
-				glColor3f(1,0,0);
-				switch(objD.getObject())
-				{
-					case 0:
-						glutWireCube(objD.getScale());
-						break;
-					case 1:
-						glutWireSphere(objD.getScale()/2, 100, 100);
-						break;
-					case 2:
-						glPushMatrix();
-						glTranslatef(0, 0, -(objD.getScale()/2));
-						glutWireCone(objD.getScale()/2, objD.getScale(), 32, 32);
-						glPopMatrix();
-						break;
-					case 3:
-						glPushMatrix();
-						glScalef(1, 1, 3);
-						glutWireTorus(objD.getScale()/3 - objD.getScale()/6,objD.getScale()/3, 32, 32);
-						glPopMatrix();
-						break;
-					case 4:
-						glutWireTeapot(objD.getScale());
-				}
-			}	
-		glPopMatrix();
+		objD.drawMaterial();
+		objD.drawObject(objDraw == currentObject);
 	}
-	
 }
 
 
