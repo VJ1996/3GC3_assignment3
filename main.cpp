@@ -264,6 +264,15 @@ void special(int key, int x, int y)
 		light1Pos[1]-=1; 
 	}
 
+	else if(key == GLUT_KEY_HOME && glutGetModifiers() == GLUT_ACTIVE_CTRL)
+	{
+		light1Pos[2] += 1;
+	}
+	else if(key == GLUT_KEY_END && glutGetModifiers() == GLUT_ACTIVE_CTRL)
+	{
+		light1Pos[2] -= 1;
+	}
+
 	//Translations
 	else if(key == GLUT_KEY_LEFT && glutGetModifiers() == GLUT_ACTIVE_SHIFT)
 	{
@@ -388,6 +397,14 @@ void special(int key, int x, int y)
 	else if(key == GLUT_KEY_DOWN)
 	{
 		light0Pos[1] -= 1;
+	}
+	else if(key == GLUT_KEY_HOME)
+	{
+		light0Pos[2] +=1;
+	}
+	else if(key == GLUT_KEY_END)
+	{
+		light0Pos[2] -= 1;
 	}
 
 	glutPostRedisplay();
@@ -602,12 +619,12 @@ void display(void)
 
 
     float diff0[4] = {1, 1, 1, 1};            
-    float amb0[4] = {0.8f, 0.1f, 0.2f, 1};
-	float spec0[4] = {0.1f, 0.1f, 0.2f, 1};
-	
+    float amb0[4] = {0.1f, 0.1f, 0.1f, 1};
+	float spec0[4] = {0.1f, 0.1f, 0.1f, 1};
+
 	float diff1[4] = {1, 0.1, 0, 1};  
-    float amb1[4] = {0.3f, 0.5f, 0.1f, 1};
-    float spec1[4] = {0.7f, 0.1f, 0.1f, 1};
+    float amb1[4] = {0.1f, 0.1f, 0.1f, 1};
+    float spec1[4] = {0.1f, 0.1f, 0.1f, 1};
 
    
     glLightfv(GL_LIGHT0, GL_DIFFUSE, diff0);
