@@ -19,8 +19,7 @@ else
 	endif
 endif
 
-PROGRAM_NAME= LectureCode1
-
+PROGRAM_NAME= Modeller.x
 run: $(PROGRAM_NAME)
 	./$(PROGRAM_NAME)$(EXEEXT)
 

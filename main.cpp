@@ -28,8 +28,8 @@ float camPos[] = {10, 10, 10};	            //initial camera location
 float camUp[] = {0, 1, 0};                  //up vector of the camera
 float camTarget[] = {0, 0, 0};	            //point camera is looking at
 
-float light0Pos[] = {-5, 3, 0, 1};          //initial light0 position
-float light1Pos[] = {5, 3, 0, 1};           //initial light1 positon
+float light0Pos[] = {5, 5, 5 , 1};          //initial light0 position
+float light1Pos[] = {0, 5, 5, 1};           //initial light1 positon
 
 
 vector<Object*> objects;
@@ -128,6 +128,10 @@ void keyboard(unsigned char key, int x, int y)
 		case 'r':
 		case 'R':
 			objects.clear();
+
+		case 'm':
+			currentObject->setMaterial(materialType);
+			break;
 		case 'a':
 		case 'A':
 			camPos[0] = camPos[0]*cos(0.03)-camPos[2]*sin(0.03);
@@ -306,6 +310,11 @@ void special(int key, int x, int y)
 	glutPostRedisplay();
 }
 
+void mouse(int btn, int state, int x, int y)
+{
+
+}
+
 void init(void)
 {
 	glClearColor(0, 0, 0, 0);
@@ -405,8 +414,8 @@ void display(void)
 	gluLookAt(camPos[0], camPos[1], camPos[2], camTarget[0],camTarget[1],camTarget[2],camUp[0], camUp[1], camUp[2]);
 
 	//set light colours
-    float diff0[4] = {0, 0.2, 1, 1};            //blue light (light0)
-    float diff1[4] = {1, 0.6, 0, 1};            //amber light (light1)
+    float diff0[4] = {1, 1, 1, 1};            //blue light (light0)
+    float diff1[4] = {1, 0.1, 0, 1};            //amber light (light1)
     float amb0[4] = {0.2f, 0.2f, 0.2f, 1};
     float amb1[4] = {0.2f, 0.2f, 0.2f, 1};
     float spec0[4] = {0.2f, 0.2f, 0.2f, 1};
@@ -423,14 +432,14 @@ void display(void)
     glLightfv(GL_LIGHT1, GL_POSITION, light1Pos);
 
     //draw sphere for light0
-    glColor3f(0, 0.2, 1);
+    glColor3f(1, 1, 1);
     glPushMatrix();
     glTranslatef(light0Pos[0], light0Pos[1], light0Pos[2]);
     glutWireSphere(0.1, 16, 16);
     glPopMatrix();
 
     //draw sphere for light1
-    glColor3f(1, 0.6, 0);
+    glColor3f(1,1,1);
     glPushMatrix();
     glTranslatef(light1Pos[0], light1Pos[1], light1Pos[2]);
     glutWireSphere(0.1, 16, 16);
@@ -464,11 +473,12 @@ int main(int argc, char** argv)
 	glutInitWindowSize(800, 800);
 	glutInitWindowPosition(100, 100);
 
-	glutCreateWindow("Snowman Example");	//creates the window
+	glutCreateWindow("Modeller.x");	//creates the window
 
 	glutDisplayFunc(display);	//registers "display" as the display callback function
 	glutKeyboardFunc(keyboard);
 	glutSpecialFunc(special);
+	glutMouseFunc(mouse);
 
 	glEnable(GL_DEPTH_TEST);
 	init();

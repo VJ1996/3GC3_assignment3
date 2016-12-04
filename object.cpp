@@ -153,25 +153,25 @@ void Object::setMaterial(int mat)
 		break;
 	case 3:
 		m_amb[0] = 0.2125;
-		m_amb[1] = 0.2125;
-		m_amb[2] = 0.2125;
+		m_amb[1] = 0.1275;
+		m_amb[2] = 0.054;
 		m_diff[0] = 0.714;
-		m_diff[1] = 0.714;
-		m_diff[2] = 0.714;
+		m_diff[1] = 0.4284;
+		m_diff[2] = 0.18144;
 		m_spec[0] = 0.393548;
-		m_spec[1] = 0.393548;
-		m_spec[2] = 0.393548;
+		m_spec[1] = 0.271906;
+		m_spec[2] = 0.166721;
 		shiny = 0.2;
 		break;
 	case 4:
 		m_amb[0] = 0.1745;
-		m_amb[1] = 0.1745;
-		m_amb[2] = 0.1745;
+		m_amb[1] = 0.01175;
+		m_amb[2] = 0.01175;
 		m_diff[0] = 0.61424;
-		m_diff[1] = 0.61424;
-		m_diff[2] = 0.61424;
+		m_diff[1] = 0.04136;
+		m_diff[2] = 0.04136;
 		m_spec[0] = 0.727811;
-		m_spec[1] = 0.727811;
+		m_spec[1] = 0.626959;
 		m_spec[2] = 0.727811;
 		shiny = 0.6;
 		break;
