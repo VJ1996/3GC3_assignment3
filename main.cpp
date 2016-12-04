@@ -8,6 +8,7 @@
 #  include <GL/gl.h>
 #  include <GL/glu.h>
 #  include <GL/freeglut.h>
+#  include <GL/glut.h>
 #endif
 
 #include <math.h>
@@ -34,6 +35,12 @@ float light1Pos[] = {0, 5, 5, 1};           //initial light1 positon
 int mX;
 int mY;
 
+int width = 0;
+int height = 0;
+int k;
+
+GLubyte *image;
+
 vector<Object*> objects;
 Object* currentObject;
 
@@ -55,9 +62,73 @@ int materialType;
 /*** 
  EYE LOCATION
  ***/
+void drawTex()
+{
+	glEnable(GL_TEXTURE_2D);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+}
 
 
+GLubyte* LoadPPM(char* file, int* width, int* height, int* max)
+{
+	GLubyte* img;
+	FILE *fd;
+	int n, m;
+	int  k, nm;
+	char c;
+	int i;
+	char b[100];
+	float s;
+	int red, green, blue;
+	
+	/* first open file and check if it's an ASCII PPM (indicated by P3 at the start) */
+	fd = fopen(file, "r");
+	fscanf(fd,"%[^\n] ",b);
+	if(b[0]!='P'|| b[1] != '3')
+	{
+		printf("%s is not a PPM file!\n",file); 
+		exit(0);
+	}
+	printf("%s is a PPM file\n", file);
+	fscanf(fd, "%c",&c);
 
+	/* next, skip past the comments - any line starting with #*/
+	while(c == '#') 
+	{
+		fscanf(fd, "%[^\n] ", b);
+		printf("%s\n",b);
+		fscanf(fd, "%c",&c);
+	}
+	ungetc(c,fd); 
+
+	/* now get the dimensions and max colour value from the image */
+	fscanf(fd, "%d %d %d", &n, &m, &k);
+
+	printf("%d rows  %d columns  max value= %d\n",n,m,k);
+
+	/* calculate number of pixels and allocate storage for this */
+	nm = n*m;
+	img = (GLubyte*) malloc(3*sizeof(GLuint)*nm);
+	s=255.0/k;
+
+	/* for every pixel, grab the read green and blue values, storing them in the image data array */
+	for(i=0;i<nm;i++) 
+	{
+		fscanf(fd,"%d %d %d",&red, &green, &blue );
+		img[3*nm-3*i-3]=red*s;
+		img[3*nm-3*i-2]=green*s;
+		img[3*nm-3*i-1]=blue*s;
+	}
+
+	/* finally, set the "return parameters" (width, height, max) and return the image array */
+	*width = n;
+	*height = m;
+	*max = k;
+
+	return img;
+}
 void keyboard(unsigned char key, int x, int y)
 {
 
@@ -136,30 +207,40 @@ void keyboard(unsigned char key, int x, int y)
 			break;
 		case 'a':
 		case 'A':
-			camPos[0] = camPos[0]*cos(0.03)-camPos[2]*sin(0.03);
-			camPos[2] = camPos[0]*sin(0.03)+camPos[2]*cos(0.03);
+			//camPos[0] += 1;
+			camPos[0] += 1;
 			break;
 
 		case 'w':
 		case 'W':
-				camPos[0] -= 0.2;
+				camPos[2] -= 0.2;
 			break;
 
 		case 'd':
 		case 'D':
-			camPos[0] = camPos[0]*cos(-0.03)-camPos[2]*sin(-0.03);
-			camPos[2] = camPos[0]*sin(-0.03)+camPos[2]*cos(-0.03);
+			//camPos[0] -= 1;
+			camPos[0] -=1;
 			break;
 
 		case 's':
 		case 'S':
-				camPos[0] += 0.2;
+				camPos[2] += 0.2;
 			break;
 
+		case 't':
+			image = LoadPPM("interface.ppm", &width, &height, &k);
+			drawTex();
+			break;
+		case 'y':
+			glDisable(GL_TEXTURE_2D);
 			
 	}
 	glutPostRedisplay();
 }
+
+
+
+
 
 void special(int key, int x, int y)
 {
@@ -431,8 +512,9 @@ void init(void)
 	glEnable(GL_LIGHT1);
 
 	
-
-	
+	glRasterPos2i(width,0);
+	glPixelZoom(-1, 1);
+	glDrawPixels(width,height,GL_RGB, GL_UNSIGNED_BYTE, image);
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -466,38 +548,38 @@ void drawObject()
 		
 		glRotatef(objD.getRZ(), 0, 0, 1);
 		glColor3f(0.25,0.25,0.25);
-
+		float scale = objD.getScale();
 		switch(objD.getObject())
 		{
 			case 0:
-				glutSolidCube(objD.getScale());
+				glutSolidCube(scale);
 				break;
 			case 1:
-				glutSolidSphere(objD.getScale()/2, 100,100);
+				glutSolidSphere(scale/2, 100,100);
 				break;
 			case 2:
 				glPushMatrix();
-				glTranslatef(0, 0, -objD.getScale()/2);
-				glutSolidCone(objD.getScale()/2, objD.getScale(), 32,32);
+				glTranslatef(0, 0, -scale/2);
+				glutSolidCone(scale/2, scale, 32,32);
 				glPopMatrix();
 				break;
 			case 3:
 				glPushMatrix();
 				glScalef(1,1,3);
-				glutSolidTorus(objD.getScale()/3 - objD.getScale()/6, objD.getScale()/3, 32, 32);
+				glutSolidTorus(scale/3 - scale/6,scale/3, 32, 32);
 				glPopMatrix();
 				break;
 			case 4:
-				glutSolidTeapot(objD.getScale());
+				glutSolidTeapot(scale);
 				break;
 		}
 		if(objDraw == currentObject)
 		{
 			glColor3f(1,0,0);
 			if(objD.getObject()== 4)
-				glutWireCube(objD.getScale()*2);
+				glutWireCube(scale*2);
 			else 	
-				glutWireCube(objD.getScale());
+				glutWireCube(scale);
 			
 		}	
 		glPopMatrix();
@@ -518,32 +600,33 @@ void display(void)
 
 	gluLookAt(camPos[0], camPos[1], camPos[2], camTarget[0],camTarget[1],camTarget[2],camUp[0], camUp[1], camUp[2]);
 
-	//set light colours
-    float diff0[4] = {1, 1, 1, 1};            //blue light (light0)
-    float diff1[4] = {1, 0.1, 0, 1};            //amber light (light1)
-    float amb0[4] = {0.2f, 0.2f, 0.2f, 1};
-    float amb1[4] = {0.2f, 0.2f, 0.2f, 1};
-    float spec0[4] = {0.2f, 0.2f, 0.2f, 1};
-    float spec1[4] = {0.2f, 0.2f, 0.2f, 1};
 
-    //set light position and properties
+    float diff0[4] = {1, 1, 1, 1};            
+    float amb0[4] = {0.8f, 0.1f, 0.2f, 1};
+	float spec0[4] = {0.1f, 0.1f, 0.2f, 1};
+	
+	float diff1[4] = {1, 0.1, 0, 1};  
+    float amb1[4] = {0.3f, 0.5f, 0.1f, 1};
+    float spec1[4] = {0.7f, 0.1f, 0.1f, 1};
+
+   
     glLightfv(GL_LIGHT0, GL_DIFFUSE, diff0);
+	glLightfv(GL_LIGHT0, GL_AMBIENT, amb0);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, spec0);
+	 glLightfv(GL_LIGHT0, GL_POSITION, light0Pos);
+
     glLightfv(GL_LIGHT1, GL_DIFFUSE, diff1);
-    glLightfv(GL_LIGHT0, GL_AMBIENT, amb0);
     glLightfv(GL_LIGHT1, GL_AMBIENT, amb1);
-    glLightfv(GL_LIGHT0, GL_SPECULAR, spec0);
     glLightfv(GL_LIGHT1, GL_SPECULAR, spec1);
-    glLightfv(GL_LIGHT0, GL_POSITION, light0Pos);
     glLightfv(GL_LIGHT1, GL_POSITION, light1Pos);
 
-    //draw sphere for light0
     glColor3f(1, 1, 1);
     glPushMatrix();
     glTranslatef(light0Pos[0], light0Pos[1], light0Pos[2]);
     glutWireSphere(0.1, 16, 16);
     glPopMatrix();
 
-    //draw sphere for light1
+
     glColor3f(1,1,1);
     glPushMatrix();
     glTranslatef(light1Pos[0], light1Pos[1], light1Pos[2]);
@@ -559,7 +642,12 @@ void display(void)
 
    
 	glFrontFace(GL_CCW);
+
+	glEnable(GL_TEXTURE_GEN_S);
+	glEnable(GL_TEXTURE_GEN_T);
 	drawObject();
+	glDisable(GL_TEXTURE_GEN_S);
+	glDisable(GL_TEXTURE_GEN_T);
 	glFrontFace(GL_CCW);
 	 
 	
@@ -569,7 +657,8 @@ void display(void)
 
 /* main function - program entry point */
 int main(int argc, char** argv)
-{
+{	
+	
 	glutInit(&argc, argv);		//starts up GLUT
 	
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
@@ -592,3 +681,4 @@ int main(int argc, char** argv)
 
 	return(0);					//return may not be necessary on all compilers
 }
+
