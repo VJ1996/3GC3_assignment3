@@ -31,6 +31,8 @@ float camTarget[] = {0, 0, 0};	            //point camera is looking at
 float light0Pos[] = {5, 5, 5 , 1};          //initial light0 position
 float light1Pos[] = {0, 5, 5, 1};           //initial light1 positon
 
+int mX;
+int mY;
 
 vector<Object*> objects;
 Object* currentObject;
@@ -310,9 +312,112 @@ void special(int key, int x, int y)
 	glutPostRedisplay();
 }
 
-void mouse(int btn, int state, int x, int y)
-{
+bool CalcIntersections(Object* object) //Literally all of this was from the lecture code
+{									   //Except for the extra X and Y arrays needed for the ray
+									   //THANK YOU BASED THOMAS FOR MAKING IT MUCH EASIER THAN IT HAS TO BE
+	GLdouble R0[3], R1[3], Rd[3]; 
+	GLdouble modelMat[16], projMat[16];
+	GLint viewMat[4];
 
+	glGetDoublev( GL_MODELVIEW_MATRIX, modelMat);
+	glGetDoublev(GL_PROJECTION_MATRIX, projMat);
+	glGetIntegerv(GL_VIEWPORT, viewMat);
+
+	//double winX = (double)mX;
+	//double winY = viewport[3] - double(mY);
+
+	gluUnProject(mX, mY, 0.0, modelMat, projMat, 
+				viewMat, &R0[0], &R0[1], &R0[2]);
+			
+	gluUnProject(mX, mY, 1.0, modelMat, projMat,
+				viewMat, &R1[0], &R1[1], &R1[2]);
+
+	Rd[0] = R1[0] - R0[0];
+	Rd[1] = R1[1] - R0[1];
+	Rd[2] = R1[2] - R0[2];
+
+	GLdouble m = sqrt(Rd[0]*Rd[0] + Rd[1]*Rd[1] + Rd[2]*Rd[2]);
+	Rd[0] /=m;
+	Rd[1] /=m;
+	Rd[2] /=m;
+
+	float tX = (((double)object->getPX()) - R0[0]/Rd[0]);
+	float tY = (((double)object->getPY()) - R0[1]/Rd[1]);
+	float tZ = (((double)object->getPZ()) - R0[2]/Rd[2]);
+
+	double ptX[3];
+	double ptY[3];
+	double ptZ[3];
+
+	ptX[0] = object->getPX();
+	ptX[1] = R0[1] + tX*Rd[1];
+	ptX[2] = R0[2] + tX*Rd[2];
+
+	ptY[0] = R0[0] + tY*Rd[0];
+	ptY[1] = object->getPY();
+	ptY[2] = R0[2] + tY*Rd[2];
+
+	ptZ[0] = R0[0] + tZ*Rd[0];
+	ptZ[1] = R0[1] + tZ*Rd[1];
+	ptZ[2] = object->getPZ();
+
+	double pX = (double)object->getPX();
+	double pY = (double)object->getPY();
+	double pZ = (double)object->getPZ();
+	double offset = (double)object->getScale()/1.5;
+
+	if(ptX[0] > pX - offset && ptX[0] < pX + offset &&
+		ptX[1] > pY - offset && ptX[1] < pY + offset &&
+		ptX[2] > pZ - offset && ptX[2] < pZ + offset)
+		{
+			return true;
+		}
+	if(ptY[0] > pX - offset && ptY[0] < pX + offset &&
+		ptY[1] > pY - offset && ptY[1] < pY + offset &&
+		ptY[2] > pZ - offset && ptY[2] < pZ + offset)
+		{
+			return true;
+		}
+	if(ptZ[0] > pX - offset && ptZ[0] < pX + offset &&
+		ptZ[1] > pY - offset && ptZ[1] < pY + offset &&
+		ptZ[2] > pZ - offset && ptZ[2] < pZ + offset)
+		{
+			return true;
+		}
+	return false;
+}
+
+void mouse(int button, int state, int x, int y)
+{
+	if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
+	{
+		mX = x;
+		mY = 800 - y;
+		for(vector<Object*>::iterator current=objects.begin(); current!=objects.end(); ++current)
+		{
+			if (CalcIntersections(*current))
+			{
+				currentObject = *current;
+			}
+		}
+	}
+	else if(button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN)
+	{
+		mX = x;
+		mY = 800-y;
+		
+		for(vector<Object*>::iterator current=objects.begin(); current!=objects.end();++current)
+		{
+			if (CalcIntersections(*current))
+			{
+				currentObject =*current;
+				//objects.erase();
+			}
+			
+		}
+		objects.erase(std::remove(objects.begin(), objects.end(), currentObject), objects.end());	
+	}
+	glutPostRedisplay();
 }
 
 void init(void)
