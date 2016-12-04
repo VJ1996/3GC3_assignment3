@@ -27,11 +27,10 @@ float cols[6][3] = { {1,0,0}, {0,1,1}, {1,1,0}, {0,1,0}, {0,0,1}, {1,0,1} };
 float camPos[] = {10, 10, 10};	            //initial camera location
 float camUp[] = {0, 1, 0};                  //up vector of the camera
 float camTarget[] = {0, 0, 0};	            //point camera is looking at
-float camSpeed = 0.1f;
+
 float light0Pos[] = {-5, 3, 0, 1};          //initial light0 position
 float light1Pos[] = {5, 3, 0, 1};           //initial light1 positon
-float camRot[] = {0, 0, 0};
-float headRot[] = {0, 0, 0};
+
 
 vector<Object*> objects;
 Object* currentObject;
@@ -158,7 +157,152 @@ void keyboard(unsigned char key, int x, int y)
 
 void special(int key, int x, int y)
 {
+
 	
+
+	if(key == GLUT_KEY_LEFT && glutGetModifiers() == GLUT_ACTIVE_CTRL)
+	{
+		light1Pos[0]-=1;
+	}
+	else if(key == GLUT_KEY_RIGHT && glutGetModifiers() == GLUT_ACTIVE_CTRL)
+	{
+		light1Pos[0]+=1;
+	}
+	else if(key == GLUT_KEY_UP && glutGetModifiers() == GLUT_ACTIVE_CTRL)
+	{
+		light1Pos[1] +=1;
+	}
+	else if(key == GLUT_KEY_DOWN && glutGetModifiers() == GLUT_ACTIVE_CTRL)
+	{
+		light1Pos[1]-=1; 
+	}
+
+	//Translations
+	else if(key == GLUT_KEY_LEFT && glutGetModifiers() == GLUT_ACTIVE_SHIFT)
+	{
+		if(currentObject!=0)
+		{
+			currentObject->translate(currentObject->getPX()-0.3,
+									currentObject->getPY(), currentObject->getPZ());
+		}
+	}
+	else if(key == GLUT_KEY_RIGHT && glutGetModifiers() == GLUT_ACTIVE_SHIFT)
+	{
+		if(currentObject!=0)
+		{
+			currentObject->translate(currentObject->getPX()+0.3,
+									currentObject->getPY(), currentObject->getPZ());
+		}
+	}
+	else if(key == GLUT_KEY_UP && glutGetModifiers() == GLUT_ACTIVE_SHIFT)
+	{
+		if(currentObject!=0){
+			currentObject->translate(currentObject->getPX(),
+									currentObject->getPY()+0.03, currentObject->getPZ());
+		}
+	}
+	else if(key == GLUT_KEY_DOWN && glutGetModifiers() == GLUT_ACTIVE_SHIFT)
+	{
+		if(currentObject!=0){
+			currentObject->translate(currentObject->getPX(),
+									currentObject->getPY()-0.03, currentObject->getPZ());
+		}
+	}
+	else if(key == GLUT_KEY_END && glutGetModifiers() == GLUT_ACTIVE_SHIFT)
+	{
+		if(currentObject!=0){
+			currentObject->translate(currentObject->getPX(),
+									currentObject->getPY(), currentObject->getPZ()-0.03);
+		}
+	}
+	else if(key == GLUT_KEY_HOME && glutGetModifiers() == GLUT_ACTIVE_SHIFT)
+	{
+		if(currentObject!=0){
+			currentObject->translate(currentObject->getPX(),
+									currentObject->getPY(), currentObject->getPZ()+0.03);
+		}
+	}
+
+	//Rotations
+
+	else if(key == GLUT_KEY_LEFT && glutGetModifiers() == GLUT_ACTIVE_ALT)
+	{
+		if(currentObject!=0)
+		{
+			currentObject->rotate(currentObject->getRX()-1,currentObject->getRY(), currentObject->getRZ());
+		}
+	}
+	else if(key == GLUT_KEY_RIGHT && glutGetModifiers() == GLUT_ACTIVE_ALT)
+	{
+		if(currentObject!=0)
+		{
+			currentObject->rotate(currentObject->getRX()+1,currentObject->getRY(), currentObject->getRZ());
+		}
+	}
+	else if(key == GLUT_KEY_UP && glutGetModifiers() == GLUT_ACTIVE_ALT)
+	{
+		if(currentObject!=0)
+		{
+			currentObject->rotate(currentObject->getRX(),currentObject->getRY()+1, currentObject->getRZ());
+		}
+	}
+	else if(key == GLUT_KEY_DOWN && glutGetModifiers() == GLUT_ACTIVE_ALT)
+	{
+		if(currentObject!=0)
+		{
+			currentObject->rotate(currentObject->getRX(),currentObject->getRY()-1, currentObject->getRZ());
+		}
+	}
+	else if(key == GLUT_KEY_END && glutGetModifiers() == GLUT_ACTIVE_ALT)
+	{
+		if(currentObject!=0)
+		{
+			currentObject->rotate(currentObject->getRX(),currentObject->getRY(), currentObject->getRZ()-1);
+		}
+	}
+	else if(key == GLUT_KEY_HOME && glutGetModifiers() == GLUT_ACTIVE_ALT)
+	{
+		if(currentObject!=0)
+		{
+			currentObject->rotate(currentObject->getRX(),currentObject->getRY(), currentObject->getRZ()+2);
+		}
+	}
+
+	//scaling
+
+	else if(key == GLUT_KEY_PAGE_UP)
+	{
+		if(currentObject!=0 && currentObject->getScale()<30)
+		{
+			currentObject->scaleObject(currentObject->getScale()+0.2); //scale up
+		}
+	}
+	else if(key == GLUT_KEY_PAGE_DOWN)
+	{
+		if(currentObject!=0 && currentObject->getScale()>0.05)
+		{
+			currentObject->scaleObject(currentObject->getScale()-0.2); //scale down
+		}
+	}
+
+	//Light controls
+	else if (key == GLUT_KEY_LEFT)
+	{
+		light0Pos[0]-=1;
+	}
+	else if(key == GLUT_KEY_RIGHT)
+	{
+		light0Pos[0]+=1;
+	}
+	else if(key == GLUT_KEY_UP)
+	{
+		light0Pos[1] +=1;
+	}
+	else if(key == GLUT_KEY_DOWN)
+	{
+		light0Pos[1] -= 1;
+	}
+
 	glutPostRedisplay();
 }
 
@@ -293,7 +437,7 @@ void display(void)
     glPopMatrix();
 
     glPushMatrix();
-    glColor3f(0.7,0.7,0.7);
+    glColor3f(0.5, 0.5, 0.5);
     glTranslatef(0,-1,0);
     glScalef(1,0.01,1);
     glutSolidCube(100);     //draws plane

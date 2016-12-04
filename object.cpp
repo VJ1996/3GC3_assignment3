@@ -58,9 +58,9 @@ Object::Object(float pX,float pY,float pZ, float rX, float rY, float rZ, float s
 
 void Object::translate(float pX, float pY, float pZ)
 {
-	this->pX += pX;
-	this->pY += pY;
-	this->pZ += pZ;
+	this->pX = pX;
+	this->pY = pY;
+	this->pZ = pZ;
 }
 
 void Object::rotate(float rX, float rY, float rZ)
