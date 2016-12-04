@@ -43,7 +43,7 @@ public:
 
 	float getScale();
 	
-	void drawObject(bool cObject);
+	//void drawObject(bool cObject);
 
 private:
 	ObjectType objectType;

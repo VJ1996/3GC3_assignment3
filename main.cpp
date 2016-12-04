@@ -1,7 +1,4 @@
-/* Snowman sample 
- * by R. Teather
- * Edited by Noel Brett
- */
+
 
 #ifdef __APPLE__
 #  include <OpenGL/gl.h>
@@ -13,6 +10,7 @@
 #  include <GL/freeglut.h>
 #endif
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <algorithm>
@@ -128,45 +126,31 @@ void keyboard(unsigned char key, int x, int y)
 			
 		}
 		break;
+		case 'r':
+		case 'R':
+			objects.clear();
 		case 'a':
 		case 'A':
-			if(camPos[0] > -4.4)
-				camPos[0] -= 0.1;
-			camRot[1] = -90;
+			camPos[0] = camPos[0]*cos(0.03)-camPos[2]*sin(0.03);
+			camPos[2] = camPos[0]*sin(0.03)+camPos[2]*cos(0.03);
 			break;
 
 		case 'w':
 		case 'W':
-			if(camPos[2] > -4.4)
-				camPos[2] -= 0.1;
-			camRot[1] = 180;
+				camPos[0] -= 0.2;
 			break;
 
 		case 'd':
 		case 'D':
-			if(camPos[0] < 4.4)
-				camPos[0]+=0.1;
-			camRot[1] = 90;
+			camPos[0] = camPos[0]*cos(-0.03)-camPos[2]*sin(-0.03);
+			camPos[2] = camPos[0]*sin(-0.03)+camPos[2]*cos(-0.03);
 			break;
 
 		case 's':
 		case 'S':
-			if(camPos[2] < 4.4)
-				camPos[2] += 0.1;
-			camRot[1] = 0;
+				camPos[0] += 0.2;
 			break;
 
-		case 'y':
-		case 'Y':
-			if(headRot[1] < 85)
-				headRot[1] += 1;
-			break;
-
-		case 'u':
-		case 'U':
-			if(headRot[1] > -85)
-				headRot[1] -= 1;
-			break;
 			
 	}
 	glutPostRedisplay();
@@ -174,12 +158,6 @@ void keyboard(unsigned char key, int x, int y)
 
 void special(int key, int x, int y)
 {
-	/* arrow key presses move the camera */
-    /************************************************************************
-     
-                        CAMERA CONTROLS
-     
-     ************************************************************************/
 	
 	glutPostRedisplay();
 }
@@ -223,8 +201,49 @@ void drawObject()
 		Object* objDraw = *draw;
 		Object objD = *objDraw;
 		objD.drawMaterial();
-		objD.drawObject(objDraw == currentObject);
-	}
+		glPushMatrix();
+		glTranslatef(objD.getPX(), objD.getPY(), objD.getPZ());
+		glRotatef(objD.getRY(), 0, 1 , 0);
+		glRotatef(objD.getRX(), 1, 0, 0);
+		
+		glRotatef(objD.getRZ(), 0, 0, 1);
+		glColor3f(0.25,0.25,0.25);
+
+		switch(objD.getObject())
+		{
+			case 0:
+				glutSolidCube(objD.getScale());
+				break;
+			case 1:
+				glutSolidSphere(objD.getScale()/2, 100,100);
+				break;
+			case 2:
+				glPushMatrix();
+				glTranslatef(0, 0, -objD.getScale()/2);
+				glutSolidCone(objD.getScale()/2, objD.getScale(), 32,32);
+				glPopMatrix();
+				break;
+			case 3:
+				glPushMatrix();
+				glScalef(1,1,3);
+				glutSolidTorus(objD.getScale()/3 - objD.getScale()/6, objD.getScale()/3, 32, 32);
+				glPopMatrix();
+				break;
+			case 4:
+				glutSolidTeapot(objD.getScale());
+				break;
+		}
+		if(objDraw == currentObject)
+		{
+			glColor3f(1,0,0);
+			if(objD.getObject()== 4)
+				glutWireCube(objD.getScale()*2);
+			else 	
+				glutWireCube(objD.getScale());
+			
+		}	
+		glPopMatrix();
+		}
 }
 
 
@@ -280,20 +299,7 @@ void display(void)
     glutSolidCube(100);     //draws plane
     glPopMatrix();
 
-    glPushMatrix();
-    glColor3f(0.5,0.5,0.5);
-    glTranslatef(-15,45,0);
-    glScalef(0.01,1,1);
-    glutSolidCube(100);     //draws plane
-    glPopMatrix();
-
-    glPushMatrix();
-    glColor3f(0.3,0.3,0.3);
-    glTranslatef(0,45,-15);
-    glScalef(1,1,0.01);
-    glutSolidCube(100);     //draws plane
-    glPopMatrix();
-  
+   
 	glFrontFace(GL_CCW);
 	drawObject();
 	glFrontFace(GL_CCW);
