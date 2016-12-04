@@ -129,6 +129,108 @@ GLubyte* LoadPPM(char* file, int* width, int* height, int* max)
 
 	return img;
 }
+/* save() - takes in all the objects in the scene and outputs it to a
+text file. The format is objecttype,scale,rotatex,rotatey,rotatez,posx,posy,posz,material*/
+void save(){
+	
+	string name;
+	printf("Please enter the name of the save file: ");
+	ofstream file;
+	cin >> name;
+	file.open(name.c_str());
+	for(int i = 0; i < objects.size();i++){
+		if(objects.at(i)->getObject() == 0){
+			file << "0,";
+		}
+		if(objects.at(i)->getObject() == 1){
+			file << "1,";
+		}
+		if(objects.at(i)->getObject() == 2){
+			file << "2,";
+		}
+		if(objects.at(i)->getObject() == 3){
+			file << "3,";
+		}
+		if(objects.at(i)->getObject() == 4){
+			file << "4,";
+		}
+		file << objects.at(i)->getScale() <<",";
+		file << objects.at(i)->getRX() <<",";
+		file << objects.at(i)->getRY() <<",";
+		file << objects.at(i)->getRZ() <<",";
+		file << objects.at(i)->getPX() <<",";
+		file << objects.at(i)->getPY() <<",";
+		file << objects.at(i)->getPZ() <<",";
+		file << objects.at(i)->getMaterial() <<"\n";	
+	}
+	file.close();
+}
+/* load() - This function takes in a file name and then draws
+the scene. The file name must match*/
+void load(){
+	objects.clear();
+	string name, line;
+	printf("Please enter the file you want to load: ");
+	cin >> name;
+	ifstream in(name.c_str());
+	for(int i = 0; getline(in, line);++i){
+		vector<float> tokens;
+		stringstream ss(line);
+		float s;
+		while(ss >> s){
+		tokens.push_back(s);
+		if(ss.peek() == ','){
+		ss.ignore();
+		}
+		}
+	
+		//now we draw the object as the info has been loaded
+		//glPushMatrix();
+				
+		switch((int)tokens.at(0))
+		{
+			case 0:
+				currentObject = new Object();
+				currentObject->setObject(0);
+				currentObject->setMaterial(materialType);
+				objects.push_back(currentObject);
+				break;
+			case 1:
+				currentObject = new Object();
+				currentObject->setObject(1);
+				currentObject->setMaterial(materialType);
+				objects.push_back(currentObject);
+				break;
+			case 2:
+				currentObject = new Object();
+				currentObject->setObject(2);
+				currentObject->setMaterial(materialType);
+				objects.push_back(currentObject);
+				break;
+			case 3:
+				currentObject = new Object();
+				currentObject->setObject(3);
+				currentObject->setMaterial(materialType);
+				objects.push_back(currentObject);
+				break;
+			case 4:
+				currentObject = new Object();
+				currentObject->setObject(4);
+				currentObject->setMaterial(materialType);
+				objects.push_back(currentObject);
+				break;
+		}
+		glPushMatrix();
+		glTranslatef(tokens.at(5), tokens.at(6), tokens.at(7));
+		glRotatef(tokens.at(3), 0, 1 , 0);
+		glRotatef(tokens.at(2), 1, 0, 0);
+		glRotatef(tokens.at(4), 0, 0, 1);
+		glColor3f(0.25,0.25,0.25);
+		glPopMatrix();
+		glutPostRedisplay();
+		
+		}
+}
 void keyboard(unsigned char key, int x, int y)
 {
 
@@ -233,6 +335,12 @@ void keyboard(unsigned char key, int x, int y)
 			break;
 		case 'y':
 			glDisable(GL_TEXTURE_2D);
+		case ' ':
+			save();
+			break;
+		case 'l':
+			load();
+			break;
 			
 	}
 	glutPostRedisplay();
